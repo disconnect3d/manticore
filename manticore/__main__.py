@@ -66,6 +66,8 @@ def parse_arguments():
                         help='Maximum number of symbolic transactions to run (positive integer) (Ethereum only)')
     parser.add_argument('--contract', type=str,
                         help='Contract name to analyze in case of multiple ones (Ethereum only)')
+    parser.add_argument('--reraise-errors', action='store_true', default=False,
+                        help='Whether to reraise Manticore\'s executor errors; used mostly for debugging')
 
     parsed = parser.parse_args(sys.argv[1:])
     if parsed.procs <= 0:
@@ -108,7 +110,8 @@ def main():
 
     env = {key: val for key, val in map(lambda env: env[0].split('='), args.env)}
 
-    m = Manticore(args.argv[0], argv=args.argv[1:], env=env, workspace_url=args.workspace,  policy=args.policy, disasm=args.disasm)
+    m = Manticore(args.argv[0], argv=args.argv[1:], env=env, workspace_url=args.workspace,
+                  policy=args.policy, disasm=args.disasm, reraise_unknown_err=args.reraise_errors)
 
     # Fixme(felipe) remove this, move to plugin
     m.coverage_file = args.coverage

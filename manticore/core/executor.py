@@ -164,12 +164,13 @@ class Executor(Eventful):
 
     _published_events = {'enqueue_state', 'generate_testcase', 'fork_state', 'load_state', 'terminate_state'}
 
-    def __init__(self, initial=None, store=None, policy='random', context=None, **kwargs):
+    def __init__(self, initial=None, store=None, policy='random', context=None, reraise_unknown_err=False, **kwargs):
         """
         :param initial: initial state
         :param store: state storage type
         :param policy: scheduling priority policy
         :param context: executor's context
+        :param reraise_unknown_err: whether to fail terribly on unknown exceptions. Used mostly for debugging.
         :param kwargs: Other kwargs - see `Eventful`.
         """
         super(Executor, self).__init__(**kwargs)
@@ -197,6 +198,9 @@ class Executor(Eventful):
         if context is None:
             context = {}
         self._shared_context = manager.dict(context)
+
+        # Whether to reraise unknown exceptions
+        self._reraise_unknown_err = reraise_unknown_err
 
         # scheduling priority policy (wip)
         # Set policy
@@ -497,6 +501,9 @@ class Executor(Eventful):
                         current_state = None
 
                 except (Exception, AssertionError) as e:
+                    if self._reraise_unknown_err:
+                        raise
+
                     import traceback
                     trace = traceback.format_exc()
                     logger.error("Exception: %s\n%s", str(e), trace)

@@ -147,7 +147,7 @@ class Manticore(Eventful):
 
     _published_events = {'start_run', 'finish_run'}
 
-    def __init__(self, path_or_state, argv=None, workspace_url=None, policy='random', **kwargs):
+    def __init__(self, path_or_state, argv=None, workspace_url=None, policy='random', reraise_unknown_err=False, **kwargs):
         super(Manticore, self).__init__()
 
         if isinstance(workspace_url, str):
@@ -165,7 +165,7 @@ class Manticore(Eventful):
 
         # sugar for 'will_execute_instruction"
         self._hooks = {}
-        self._executor = Executor(store=self._output.store, policy=policy)
+        self._executor = Executor(store=self._output.store, policy=policy, reraise_unknown_err=reraise_unknown_err)
         self._workers = []
 
         # Link Executor events to default callbacks in manticore object
